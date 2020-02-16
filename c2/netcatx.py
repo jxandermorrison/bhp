@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 import sys
 import socket
 import getopt
@@ -38,55 +40,6 @@ def usage():
     print "echo \"ABCEDEF\" | netcatx.py -t 192.168.0.1 -p 135 -l -"
     sys.exit(0)
 
-def main():
-    global listen
-    global command
-    global upload
-    global execute
-    global target
-    global upload_destination
-    global port
-
-    if not(len(argv[1:])):
-        usage()
-
-    try:
-        opts, args = getopt.getopt(sys.argv[1:], "hle:t:p:cu:",
-                ["help", "listen", "execute", "target", "port", "command",
-                    "upload"])
-    except getopt.GetoptError as err:
-        print str(err)
-        usage()
-
-    for o, a in opts:
-        if o in ("-h", "--help"):
-            usage()
-        elif o in ("-l", "--listen"):
-            listen = a
-        elif o in ("-e", "--execute"):
-            execute = a
-        elif o in ("-c", "--command"):
-            command = True
-        elif o in ("-u", "--upload"):
-            upload_destination = a
-        elif o in ("-t", "--target"):
-            target = a
-        elif o in ("-p", "--port"):
-            port = int(a)
-        else:
-            assert False, "Unhandled option"
-
-    if not listen and len(target) and port > 0:
-
-        buffer = sys.stdin.read()
-
-        client_sender(buffer)
-
-    if listen:
-        server_loop()
-
-main()
-
 def client_sender(buffer):
 
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -108,7 +61,7 @@ def client_sender(buffer):
                 recv_len = len(data)
                 response += data
 
-                if recv_lin < 4096:
+                if recv_len < 4096:
                     break
 
             print response,
@@ -122,6 +75,8 @@ def client_sender(buffer):
         print "[*]Exception! Exiting."
 
         client.close()
+
+        raise
 
 def server_loop():
 
@@ -201,3 +156,52 @@ def client_handler(client_socket):
             response = run_command(cmd_buffer)
 
             client_socket.send(response)
+
+def main():
+    global listen
+    global command
+    global upload
+    global execute
+    global target
+    global upload_destination
+    global port
+
+    if not(len(sys.argv[1:])):
+        usage()
+
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "hle:t:p:cu:",
+                ["help", "listen", "execute", "target", "port", "command",
+                    "upload"])
+    except getopt.GetoptError as err:
+        print str(err)
+        usage()
+
+    for o, a in opts:
+        if o in ("-h", "--help"):
+            usage()
+        elif o in ("-l", "--listen"):
+            listen = True
+        elif o in ("-e", "--execute"):
+            execute = a
+        elif o in ("-c", "--command"):
+            command = True
+        elif o in ("-u", "--upload"):
+            upload_destination = a
+        elif o in ("-t", "--target"):
+            target = a
+        elif o in ("-p", "--port"):
+            port = int(a)
+        else:
+            assert False, "Unhandled option"
+
+    if not listen and len(target) and port > 0:
+
+        buffer = sys.stdin.read()
+
+        client_sender(buffer)
+
+    if listen:
+        server_loop()
+
+main()
