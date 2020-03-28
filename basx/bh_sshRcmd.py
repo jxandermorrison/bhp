@@ -22,4 +22,4 @@ def ssh_command(ip, user, passwd, command):
 
     return
 
-ssh_command("ip_here", "example", "passwd", "ClientConnected")
+ssh_command("ip_here", "xander", "lovesthepython", "ClientConnected")
