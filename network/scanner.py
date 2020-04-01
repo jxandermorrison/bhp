@@ -64,6 +64,7 @@ def udp_sender(subnet, magic_message):
     sender = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
     for ip in IPNetwork(subnet):
+        print ip
         try:
             sender.sendto(magic_message, ("%s" % ip, 65212))
         except:
